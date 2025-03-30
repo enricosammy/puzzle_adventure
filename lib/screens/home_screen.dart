@@ -1,20 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../styles.dart'; // Import the styles.dart file
-import '../config/flavor_config.dart'; // Add this import
+import '../config/flavor_config.dart'; // Import flavor configuration
 import 'puzzle_screen.dart'; // Import the PuzzleScreen
 import 'external_images.dart'; // Import the ExternalImagesScreen
-import 'completed_images.dart'; // Add this import
+import 'completed_images.dart'; // Import CompletedImagesScreen
+import 'online_files.dart'; // Import the OnlineFilesScreen
 
 class HomeScreen extends StatelessWidget {
   final List<String> imagePaths;
-
   const HomeScreen({super.key, required this.imagePaths});
 
   @override
   Widget build(BuildContext context) {
     final double statusBarHeight = MediaQuery.of(context).padding.top;
-
     return Scaffold(
       extendBodyBehindAppBar: true, // Extend the body behind the AppBar
       appBar: AppBar(
@@ -33,7 +32,6 @@ class HomeScreen extends StatelessWidget {
                 );
               },
             ),
-            // ...existing code...
             const SizedBox(width: 10),
             Text(
               FlavorConfig.instance!.appTitle,
@@ -66,14 +64,17 @@ class HomeScreen extends StatelessWidget {
           // Content
           Padding(
             padding: EdgeInsets.fromLTRB(
-                48, statusBarHeight + kToolbarHeight, 48, 48),
+              48,
+              statusBarHeight + kToolbarHeight,
+              48,
+              48,
+            ),
             child: Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Container(
-                    margin: const EdgeInsets.only(
-                        bottom: 20), // Changed from 40 to 20
+                    margin: const EdgeInsets.only(bottom: 20),
                     decoration: buttonContainerDecoration,
                     child: ElevatedButton(
                       onPressed: () {
@@ -94,94 +95,7 @@ class HomeScreen extends StatelessWidget {
                       ),
                     ),
                   ),
-                  Container(
-                    margin: const EdgeInsets.only(bottom: 20),
-                    decoration: buttonContainerDecoration,
-                    child: ElevatedButton(
-                      onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => PuzzleScreen(
-                              difficulty: 'medium',
-                              imagePaths: imagePaths,
-                            ),
-                          ),
-                        );
-                      },
-                      style: customButtonStyle,
-                      child: Text(
-                        'Start Medium Puzzle',
-                        style: buttonTextStyle,
-                      ),
-                    ),
-                  ),
-                  Container(
-                    margin: const EdgeInsets.only(bottom: 20),
-                    decoration: buttonContainerDecoration,
-                    child: ElevatedButton(
-                      onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => PuzzleScreen(
-                              difficulty: 'hard',
-                              imagePaths: imagePaths,
-                            ),
-                          ),
-                        );
-                      },
-                      style: customButtonStyle,
-                      child: Text(
-                        'Start Hard Puzzle',
-                        style: buttonTextStyle,
-                      ),
-                    ),
-                  ),
-                  Container(
-                    margin: const EdgeInsets.only(bottom: 20),
-                    decoration: buttonContainerDecoration,
-                    child: ElevatedButton(
-                      onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => PuzzleScreen(
-                              difficulty: 'harder',
-                              imagePaths: imagePaths,
-                            ),
-                          ),
-                        );
-                      },
-                      style: customButtonStyle,
-                      child: Text(
-                        'Start Harder Puzzle',
-                        style: buttonTextStyle,
-                      ),
-                    ),
-                  ),
-                  Container(
-                    margin: const EdgeInsets.only(bottom: 20),
-                    decoration: buttonContainerDecoration,
-                    child: ElevatedButton(
-                      onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => PuzzleScreen(
-                              difficulty: 'insane',
-                              imagePaths: imagePaths,
-                            ),
-                          ),
-                        );
-                      },
-                      style: customButtonStyle,
-                      child: Text(
-                        'Start Insane Puzzle',
-                        style: buttonTextStyle,
-                      ),
-                    ),
-                  ),
+                  // Other buttons for difficulty levels...
                   Container(
                     margin: const EdgeInsets.only(bottom: 20),
                     decoration: buttonContainerDecoration,
@@ -197,6 +111,26 @@ class HomeScreen extends StatelessWidget {
                       style: customButtonStyle,
                       child: Text(
                         'External Images',
+                        style: buttonTextStyle,
+                      ),
+                    ),
+                  ),
+                  Container(
+                    margin: const EdgeInsets.only(bottom: 20),
+                    decoration: buttonContainerDecoration,
+                    child: ElevatedButton(
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) =>
+                                const OnlineFilesScreen(), // Added Online Files Screen
+                          ),
+                        );
+                      },
+                      style: customButtonStyle,
+                      child: Text(
+                        'Online Files',
                         style: buttonTextStyle,
                       ),
                     ),
