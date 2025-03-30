@@ -20,13 +20,23 @@ class _OnlineFilesScreenState extends State<OnlineFilesScreen> {
 
   Future<void> _loadFilesAndFolders() async {
     try {
-      final directory = Directory.current; // Gets the current working directory
-      final entities = directory.listSync(); // List all files and folders
+      final directory =
+          Directory('puzzle_flavors'); // Updated path to parent folder
+      if (directory.existsSync()) {
+        final entities = directory
+            .listSync(); // List all files and folders in puzzle_flavors
 
-      setState(() {
-        _filesAndFolders = entities;
-        _errorMessage = entities.isEmpty ? 'No files or folders found.' : null;
-      });
+        setState(() {
+          _filesAndFolders = entities;
+          _errorMessage = entities.isEmpty
+              ? 'No files or folders found in puzzle_flavors.'
+              : null;
+        });
+      } else {
+        setState(() {
+          _errorMessage = 'Directory does not exist: puzzle_flavors.';
+        });
+      }
     } catch (e) {
       setState(() {
         _errorMessage = 'Error loading files and folders: $e';
@@ -41,7 +51,10 @@ class _OnlineFilesScreenState extends State<OnlineFilesScreen> {
         title: const Text('Online Files'),
       ),
       body: _errorMessage != null
-          ? Center(child: Text(_errorMessage!))
+          ? Center(
+              child: Text(_errorMessage!,
+                  style: const TextStyle(color: Colors.red, fontSize: 16)),
+            )
           : ListView.builder(
               itemCount: _filesAndFolders.length,
               itemBuilder: (context, index) {
@@ -51,7 +64,14 @@ class _OnlineFilesScreenState extends State<OnlineFilesScreen> {
                 return ListTile(
                   leading: Icon(
                       isDirectory ? Icons.folder : Icons.insert_drive_file),
-                  title: Text(entity.path.split(Platform.pathSeparator).last),
+                  title: Text(
+                    entity.path.split(Platform.pathSeparator).last,
+                    style: const TextStyle(fontSize: 16),
+                  ),
+                  onTap: () {
+                    // Placeholder for actions when clicking on a file/folder
+                    debugPrint('Tapped: ${entity.path}');
+                  },
                 );
               },
             ),
