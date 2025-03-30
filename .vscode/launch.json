@@ -1,0 +1,30 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+      
+      {
+        "name": "Women",
+        "program": "lib/main.dart",
+        "request": "launch",
+        "type": "dart",
+        "args": ["--flavor", "women"],
+        "flutterMode": "debug"
+    },
+        {
+            "name": "Cartoons",
+            "program": "lib/main.dart",
+            "request": "launch",
+            "type": "dart",
+            "args": ["--flavor", "cartoons"],
+            "flutterMode": "debug"
+        },
+        {
+            "name": "Pets",
+            "program": "lib/main.dart",
+            "request": "launch",
+            "type": "dart",
+            "args": ["--flavor", "pets"],
+            "flutterMode": "debug"
+        }
+    ]
+}
