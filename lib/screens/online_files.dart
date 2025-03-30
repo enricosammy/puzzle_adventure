@@ -1,4 +1,5 @@
-import 'package:path_provider/path_provider.dart';
+import 'package:flutter/material.dart';
+import 'dart:io';
 
 class OnlineFilesScreen extends StatefulWidget {
   const OnlineFilesScreen({super.key});
@@ -19,8 +20,8 @@ class _OnlineFilesScreenState extends State<OnlineFilesScreen> {
 
   Future<void> _loadFilesAndFolders() async {
     try {
-      final directory = Directory.current;
-      final entities = directory.listSync();
+      final directory = Directory.current; // Gets the current working directory
+      final entities = directory.listSync(); // List all files and folders
 
       setState(() {
         _filesAndFolders = entities;

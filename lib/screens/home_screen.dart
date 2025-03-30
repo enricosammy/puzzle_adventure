@@ -123,8 +123,7 @@ class HomeScreen extends StatelessWidget {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) =>
-                                const OnlineFilesScreen(), // Added Online Files Screen
+                            builder: (context) => const OnlineFilesScreen(),
                           ),
                         );
                       },
@@ -135,6 +134,7 @@ class HomeScreen extends StatelessWidget {
                       ),
                     ),
                   ),
+
                   Container(
                     margin: const EdgeInsets.only(bottom: 20),
                     decoration: buttonContainerDecoration,
