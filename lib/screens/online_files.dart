@@ -14,6 +14,10 @@ class _OnlineFilesScreenState extends State<OnlineFilesScreen> {
   List<dynamic> _filesAndFolders = [];
   String? _errorMessage;
 
+  // Define the flavor variable with lowercase 'flavor'
+  static const flavor =
+      String.fromEnvironment('flavor', defaultValue: 'default');
+
   @override
   void initState() {
     super.initState();
@@ -22,8 +26,9 @@ class _OnlineFilesScreenState extends State<OnlineFilesScreen> {
 
   Future<void> _loadFilesAndFolders() async {
     try {
+      // Use the lowercase 'flavor' variable to construct the API URL
       final apiUrl =
-          '${dotenv.env['GITHUB_API_BASE_URL']}/repos/${dotenv.env['GITHUB_REPO_OWNER']}/${dotenv.env['GITHUB_REPO_NAME']}/contents/puzzle_flavors';
+          '${dotenv.env['GITHUB_API_BASE_URL']}/repos/${dotenv.env['GITHUB_REPO_OWNER']}/${dotenv.env['GITHUB_REPO_NAME']}/contents/puzzle_flavors/$flavor';
       final token = dotenv.env['GITHUB_API_TOKEN'];
 
       final response = await http.get(
@@ -38,17 +43,19 @@ class _OnlineFilesScreenState extends State<OnlineFilesScreen> {
         setState(() {
           _filesAndFolders = data as List<dynamic>;
           _errorMessage = data.isEmpty
-              ? 'No files or folders found in puzzle_flavors.'
+              ? 'No files or folders found in the "$flavor" folder.'
               : null;
         });
       } else {
         setState(() {
-          _errorMessage = 'Failed to fetch files: ${response.reasonPhrase}';
+          _errorMessage =
+              'Failed to fetch files for flavor "$flavor": ${response.reasonPhrase}';
         });
       }
     } catch (e) {
       setState(() {
-        _errorMessage = 'Error loading files and folders: $e';
+        _errorMessage =
+            'Error loading files and folders for flavor "$flavor": $e';
       });
     }
   }
