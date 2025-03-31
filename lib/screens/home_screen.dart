@@ -221,7 +221,7 @@ class HomeScreen extends StatelessWidget {
                       },
                       style: customButtonStyle,
                       child: Text(
-                        'Show Completed Images',
+                        'Completed Images',
                         style: buttonTextStyle,
                       ),
                     ),

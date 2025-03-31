@@ -30,7 +30,6 @@ flutter:
     - assets/
     - assets/logo.png
     - assets/background.jpg
-    - assets/wood_tile.png
     - assets/banner.png
     
     # Videos

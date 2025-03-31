@@ -17,10 +17,18 @@ final customButtonStyle = ElevatedButton.styleFrom(
 );
 
 final buttonTextStyle = const TextStyle(
-  color: Colors.white,
-  fontSize: 16,
+  color: Color.fromRGBO(211, 144, 94, 1),
+  fontSize: 20,
   fontWeight: FontWeight.bold,
-  fontFamily: 'Petrona',
+  fontFamily: 'Arial',
+  shadows: [
+    Shadow(
+      color: Colors.black, // Choose the color of the shadow
+      blurRadius: 0.5, // Adjust the blur radius for the shadow effect
+      offset: Offset(
+          2.0, 2.0), // Set the horizontal and vertical offset for the shadow
+    ),
+  ],
 );
 
 final buttonContainerDecoration = BoxDecoration(
