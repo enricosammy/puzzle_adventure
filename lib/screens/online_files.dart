@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
-import 'dart:io';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class OnlineFilesScreen extends StatefulWidget {
   const OnlineFilesScreen({super.key});
@@ -9,7 +11,7 @@ class OnlineFilesScreen extends StatefulWidget {
 }
 
 class _OnlineFilesScreenState extends State<OnlineFilesScreen> {
-  List<FileSystemEntity> _filesAndFolders = [];
+  List<dynamic> _filesAndFolders = [];
   String? _errorMessage;
 
   @override
@@ -20,21 +22,28 @@ class _OnlineFilesScreenState extends State<OnlineFilesScreen> {
 
   Future<void> _loadFilesAndFolders() async {
     try {
-      final directory =
-          Directory('./puzzle_flavors'); // Path to the puzzle_flavors folder
-      if (directory.existsSync()) {
-        final entities = directory
-            .listSync(); // List all files and folders in puzzle_flavors
+      final apiUrl =
+          '${dotenv.env['GITHUB_API_BASE_URL']}/repos/${dotenv.env['GITHUB_REPO_OWNER']}/${dotenv.env['GITHUB_REPO_NAME']}/contents/puzzle_flavors';
+      final token = dotenv.env['GITHUB_API_TOKEN'];
 
+      final response = await http.get(
+        Uri.parse(apiUrl),
+        headers: {
+          'Authorization': 'Bearer $token',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
         setState(() {
-          _filesAndFolders = entities;
-          _errorMessage = entities.isEmpty
+          _filesAndFolders = data as List<dynamic>;
+          _errorMessage = data.isEmpty
               ? 'No files or folders found in puzzle_flavors.'
               : null;
         });
       } else {
         setState(() {
-          _errorMessage = 'Directory does not exist: puzzle_flavors.';
+          _errorMessage = 'Failed to fetch files: ${response.reasonPhrase}';
         });
       }
     } catch (e) {
@@ -61,18 +70,15 @@ class _OnlineFilesScreenState extends State<OnlineFilesScreen> {
               itemCount: _filesAndFolders.length,
               itemBuilder: (context, index) {
                 final entity = _filesAndFolders[index];
-                final isDirectory =
-                    FileSystemEntity.isDirectorySync(entity.path);
+                final isDirectory = entity['type'] ==
+                    'dir'; // GitHub API specifies 'dir' for folders
                 return ListTile(
                   leading: Icon(
                       isDirectory ? Icons.folder : Icons.insert_drive_file),
-                  title: Text(
-                    entity.path.split(Platform.pathSeparator).last,
-                    style: const TextStyle(fontSize: 16),
-                  ),
+                  title: Text(entity['name'] as String,
+                      style: const TextStyle(fontSize: 16)),
                   onTap: () {
-                    // Placeholder for actions when clicking on a file/folder
-                    debugPrint('Tapped: ${entity.path}');
+                    debugPrint('Tapped: ${entity['path']}');
                   },
                 );
               },
