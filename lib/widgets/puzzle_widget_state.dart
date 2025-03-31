@@ -317,12 +317,11 @@ class PuzzleWidgetState extends State<PuzzleWidget> {
         Container(
           padding: const EdgeInsets.all(8.0),
           decoration: BoxDecoration(
-            image: const DecorationImage(
-              image: AssetImage('assets/infos.jpg'),
-              fit: BoxFit.cover,
-            ),
+            color: Colors.black.withAlpha(
+                128), // Black with 50% transparency (alpha value ranges 0-255)
             border: Border.all(
-              color: const Color(0xFFF5F5DC),
+              color:
+                  const Color(0xFFF5F5DC), // Keeping the existing border color
               width: 2,
             ),
             borderRadius: BorderRadius.circular(8.0),
