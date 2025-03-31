@@ -1,12 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:puzzle_adventure/screens/online_files.dart';
+import '/screens/online_files.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Load environment variables
-  await dotenv.load(fileName: ".env");
+  try {
+    await dotenv.load(fileName: ".env");
+    print("ENV LOADED: ${dotenv.env['GITHUB_API_BASE_URL']}"); // Debugging line
+  } catch (e) {
+    print("Failed to load .env: $e");
+  }
 
   runApp(const MyApp());
 }

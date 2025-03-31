@@ -47,6 +47,9 @@ flutter:
     - assets/puzzle_images/women/imgs/
     - assets/puzzle_images/women/puzzle/
 
+    # other assets
+    - .env
+    
   fonts:
     - family: Petrona
       fonts:
