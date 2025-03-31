@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 
 final customButtonStyle = ElevatedButton.styleFrom(
   backgroundColor: const Color(0xFF7B4924),
-  minimumSize: const Size(double.infinity, 60),
+  minimumSize: const Size(double.infinity, 50),
   shape: RoundedRectangleBorder(
     borderRadius: BorderRadius.circular(50),
   ),
@@ -13,12 +13,12 @@ final customButtonStyle = ElevatedButton.styleFrom(
     color: Color.fromRGBO(181, 125, 82, 1),
     width: 3,
   ),
-  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
 );
 
 final buttonTextStyle = const TextStyle(
   color: Colors.white,
-  fontSize: 20,
+  fontSize: 16,
   fontWeight: FontWeight.bold,
   fontFamily: 'Petrona',
 );
