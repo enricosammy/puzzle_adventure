@@ -21,7 +21,7 @@ class _OnlineFilesScreenState extends State<OnlineFilesScreen> {
   Future<void> _loadFilesAndFolders() async {
     try {
       final directory =
-          Directory('puzzle_flavors'); // Updated path to parent folder
+          Directory('./puzzle_flavors'); // Path to the puzzle_flavors folder
       if (directory.existsSync()) {
         final entities = directory
             .listSync(); // List all files and folders in puzzle_flavors
@@ -52,8 +52,10 @@ class _OnlineFilesScreenState extends State<OnlineFilesScreen> {
       ),
       body: _errorMessage != null
           ? Center(
-              child: Text(_errorMessage!,
-                  style: const TextStyle(color: Colors.red, fontSize: 16)),
+              child: Text(
+                _errorMessage!,
+                style: const TextStyle(color: Colors.red, fontSize: 16),
+              ),
             )
           : ListView.builder(
               itemCount: _filesAndFolders.length,
