@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'dart:convert';
-import 'dart:io';
 import 'package:http/http.dart' as http;
-import 'package:path_provider/path_provider.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:path_provider/path_provider.dart';
+import 'dart:io';
 
 class OnlineFilesScreen extends StatefulWidget {
   const OnlineFilesScreen({super.key});
@@ -15,10 +15,9 @@ class OnlineFilesScreen extends StatefulWidget {
 class _OnlineFilesScreenState extends State<OnlineFilesScreen> {
   final List<dynamic> _filesAndFolders = [];
   String? _errorMessage;
-  bool _isDownloading = false; // Tracking download state
-  double _downloadProgress = 0.0; // Progress indicator
-
-  static const flavor =
+  bool _isDownloading = false;
+  double _downloadProgress = 0.0;
+  static const String flavor =
       String.fromEnvironment('flavor', defaultValue: 'default');
 
   @override
@@ -49,25 +48,22 @@ class _OnlineFilesScreenState extends State<OnlineFilesScreen> {
               : null;
         });
       } else {
-        if (!mounted) return;
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-              content: Text('Failed to fetch files: ${response.reasonPhrase}')),
-        );
+        setState(() {
+          _errorMessage = 'Failed to fetch files: ${response.reasonPhrase}';
+        });
       }
     } catch (e) {
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error loading files and folders: $e')),
-      );
+      setState(() {
+        _errorMessage = 'Error loading files and folders: $e';
+      });
     }
   }
 
   Future<void> _downloadImages() async {
     try {
       setState(() {
-        _isDownloading = true; // Enable download state
-        _downloadProgress = 0.0; // Reset progress
+        _isDownloading = true;
+        _downloadProgress = 0.0;
       });
 
       final directory = await getApplicationDocumentsDirectory();
@@ -79,6 +75,7 @@ class _OnlineFilesScreenState extends State<OnlineFilesScreen> {
       final apiUrl =
           '${dotenv.env['GITHUB_API_BASE_URL']}/repos/${dotenv.env['GITHUB_REPO_OWNER']}/${dotenv.env['GITHUB_REPO_NAME']}/contents/puzzle_flavors/$flavor';
       final token = dotenv.env['GITHUB_API_TOKEN'];
+
       final response = await http.get(
         Uri.parse(apiUrl),
         headers: {
@@ -96,55 +93,70 @@ class _OnlineFilesScreenState extends State<OnlineFilesScreen> {
             final fileName = file['name'] as String;
             final localFile = File('${flavorDir.path}/$fileName');
             await localFile.writeAsBytes(imageResponse.bodyBytes);
-
             setState(() {
-              _downloadProgress = (i + 1) / data.length; // Update progress
+              _downloadProgress = (i + 1) / data.length;
             });
           }
         }
-        if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Images downloaded successfully!')),
         );
       } else {
-        if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
               content: Text('Failed to fetch files: ${response.reasonPhrase}')),
         );
       }
     } catch (e) {
-      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Error downloading images: $e')),
       );
     } finally {
       setState(() {
-        _isDownloading = false; // Reset download state
+        _isDownloading = false;
       });
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    // Determine the path based on the flavor
     final String backgroundImagePath =
         'assets/puzzle_images/$flavor/imgs/download_background.png';
-
     return Scaffold(
+      extendBodyBehindAppBar: true,
       appBar: AppBar(
-        title: const Text('Online Files'),
+        title: Row(
+          children: [
+            Image.asset(
+              'assets/logo.png',
+              height: 40,
+              errorBuilder: (context, error, stackTrace) {
+                return const Icon(Icons.image_not_supported, size: 40);
+              },
+            ),
+            const SizedBox(width: 10),
+            const Text(
+              'Online Files',
+              style: TextStyle(color: Colors.white),
+            ),
+          ],
+        ),
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        iconTheme: const IconThemeData(color: Colors.white),
       ),
       body: Stack(
         children: [
-          // Show background and progress bar during download
-          if (_isDownloading) ...[
-            Positioned.fill(
-              child: Image.asset(
-                backgroundImagePath, // Load based on flavor
-                fit: BoxFit.cover, // Cover the entire screen
-              ),
+          Positioned.fill(
+            child: Image.asset(
+              backgroundImagePath,
+              fit: BoxFit.cover,
+              errorBuilder: (context, error, stackTrace) {
+                return const SizedBox();
+              },
             ),
+          ),
+          if (_isDownloading)
             Center(
               child: Column(
                 mainAxisSize: MainAxisSize.min,
@@ -169,39 +181,55 @@ class _OnlineFilesScreenState extends State<OnlineFilesScreen> {
                   ),
                 ],
               ),
-            ),
-          ],
-          // Default content when not downloading
-          if (!_isDownloading)
-            Column(
-              children: [
-                if (_errorMessage != null)
-                  Center(
-                    child: Text(
-                      _errorMessage!,
-                      style: const TextStyle(color: Colors.red, fontSize: 16),
+            )
+          else if (_errorMessage != null)
+            Center(
+              child: Text(
+                _errorMessage!,
+                style: const TextStyle(color: Colors.white),
+              ),
+            )
+          else
+            GridView.builder(
+              padding: const EdgeInsets.all(8.0),
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 3,
+                crossAxisSpacing: 8.0,
+                mainAxisSpacing: 8.0,
+              ),
+              itemCount: _filesAndFolders.length,
+              itemBuilder: (context, index) {
+                final entity = _filesAndFolders[index];
+                return GestureDetector(
+                  onTap: () {
+                    debugPrint('Tapped: ${entity['path']}');
+                  },
+                  child: Container(
+                    color: Colors.white.withOpacity(0.2),
+                    child: Center(
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            entity['type'] == 'dir'
+                                ? Icons.folder
+                                : Icons.insert_drive_file,
+                            color: Colors.white,
+                          ),
+                          Text(
+                            entity['name'] as String,
+                            textAlign: TextAlign.center,
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 12,
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
-                Expanded(
-                  child: ListView.builder(
-                    itemCount: _filesAndFolders.length,
-                    itemBuilder: (context, index) {
-                      final entity = _filesAndFolders[index];
-                      final isDirectory = entity['type'] == 'dir';
-                      return ListTile(
-                        leading: Icon(isDirectory
-                            ? Icons.folder
-                            : Icons.insert_drive_file),
-                        title: Text(entity['name'] as String,
-                            style: const TextStyle(fontSize: 16)),
-                        onTap: () {
-                          debugPrint('Tapped: ${entity['path']}');
-                        },
-                      );
-                    },
-                  ),
-                ),
-              ],
+                );
+              },
             ),
         ],
       ),
