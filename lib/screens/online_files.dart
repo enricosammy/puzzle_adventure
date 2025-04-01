@@ -127,24 +127,63 @@ class _OnlineFilesScreenState extends State<OnlineFilesScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // Determine the path based on the flavor
+    final String backgroundImagePath =
+        'assets/puzzle_images/$flavor/imgs/download_background.png';
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Online Files'),
       ),
-      body: Column(
+      body: Stack(
         children: [
-          if (_isDownloading)
-            LinearProgressIndicator(
-                value: _downloadProgress), // Show progress bar
-          Expanded(
-            child: _errorMessage != null
-                ? Center(
+          // Show background and progress bar during download
+          if (_isDownloading) ...[
+            Positioned.fill(
+              child: Image.asset(
+                backgroundImagePath, // Load based on flavor
+                fit: BoxFit.cover, // Cover the entire screen
+              ),
+            ),
+            Center(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Text(
+                    'Downloading...',
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  LinearProgressIndicator(value: _downloadProgress),
+                  const SizedBox(height: 10),
+                  Text(
+                    '${(_downloadProgress * 100).toStringAsFixed(1)}% completed',
+                    style: const TextStyle(
+                      fontSize: 16,
+                      color: Colors.white,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+          // Default content when not downloading
+          if (!_isDownloading)
+            Column(
+              children: [
+                if (_errorMessage != null)
+                  Center(
                     child: Text(
                       _errorMessage!,
                       style: const TextStyle(color: Colors.red, fontSize: 16),
                     ),
-                  )
-                : ListView.builder(
+                  ),
+                Expanded(
+                  child: ListView.builder(
                     itemCount: _filesAndFolders.length,
                     itemBuilder: (context, index) {
                       final entity = _filesAndFolders[index];
@@ -161,7 +200,9 @@ class _OnlineFilesScreenState extends State<OnlineFilesScreen> {
                       );
                     },
                   ),
-          ),
+                ),
+              ],
+            ),
         ],
       ),
       floatingActionButton: FloatingActionButton(
