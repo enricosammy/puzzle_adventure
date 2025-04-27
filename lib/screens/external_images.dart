@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'dart:io';
+import 'dart:ui'; // Import for blur effects
 import '../config/flavor_config.dart';
 import 'package:path_provider/path_provider.dart';
 
@@ -12,6 +13,7 @@ class ExternalImagesScreen extends StatefulWidget {
 
 class _ExternalImagesScreenState extends State<ExternalImagesScreen> {
   List<File> _images = [];
+  List<String> completedImages = []; // List to store completed image filenames
   String? _errorMessage;
 
   @override
@@ -43,11 +45,27 @@ class _ExternalImagesScreenState extends State<ExternalImagesScreen> {
           .map((e) => File(e.path))
           .toList();
 
-      debugPrint('Found ${imageFiles.length} puzzle images');
+      final validImageFiles = imageFiles.where((file) {
+        final fileName = file.path.split('/').last.split('.').first;
+        return int.tryParse(fileName) != null;
+      }).toList();
+
+      validImageFiles.sort((a, b) {
+        final aName = int.parse(a.path.split('/').last.split('.').first);
+        final bName = int.parse(b.path.split('/').last.split('.').first);
+        return aName.compareTo(bName);
+      });
+
+      debugPrint(
+          'Valid and sorted images: ${validImageFiles.map((e) => e.path).toList()}');
+
+      // Simulate completed images (for testing, replace with actual logic)
+      completedImages = ['1', '3', '5']; // Example of completed image filenames
 
       setState(() {
-        _images = imageFiles;
-        _errorMessage = imageFiles.isEmpty ? 'No puzzle images found' : null;
+        _images = validImageFiles;
+        _errorMessage =
+            validImageFiles.isEmpty ? 'No valid puzzle images found' : null;
       });
     } catch (e) {
       debugPrint('Error loading puzzle images: $e');
@@ -62,7 +80,7 @@ class _ExternalImagesScreenState extends State<ExternalImagesScreen> {
     final double statusBarHeight = MediaQuery.of(context).padding.top;
 
     return Scaffold(
-      extendBodyBehindAppBar: true, // Extend the body behind the AppBar
+      extendBodyBehindAppBar: true,
       appBar: AppBar(
         title: Row(
           children: [
@@ -70,21 +88,17 @@ class _ExternalImagesScreenState extends State<ExternalImagesScreen> {
               FlavorConfig.instance!.logoPath,
               height: 40,
               errorBuilder: (context, error, stackTrace) {
-                return Image.asset('assets/logo.png', height: 40);
+                return const Icon(Icons.image_not_supported, size: 40);
               },
             ),
             const SizedBox(width: 10),
-            const Text(
-              'External Images',
-              style: TextStyle(color: Colors.white), // Set text color to white
-            ),
+            const Text('External Images',
+                style: TextStyle(color: Colors.white)),
           ],
         ),
-        backgroundColor:
-            Colors.transparent, // Make AppBar background transparent
+        backgroundColor: Colors.transparent,
         elevation: 0,
-        iconTheme:
-            const IconThemeData(color: Colors.white), // Set icon color to white
+        iconTheme: const IconThemeData(color: Colors.white),
       ),
       body: Stack(
         children: [
@@ -98,82 +112,67 @@ class _ExternalImagesScreenState extends State<ExternalImagesScreen> {
               },
             ),
           ),
-          // Content
+          // Main content
           Padding(
             padding: EdgeInsets.only(top: statusBarHeight + kToolbarHeight),
             child: _errorMessage != null
                 ? Center(
-                    child: Text(_errorMessage!,
-                        style: const TextStyle(color: Colors.white)))
+                    child: Text(
+                      _errorMessage!,
+                      style: const TextStyle(color: Colors.white),
+                    ),
+                  )
                 : _images.isEmpty
                     ? const Center(child: CircularProgressIndicator())
-                    : Column(
-                        children: [
-                          Expanded(
-                            child: GridView.builder(
-                              padding: const EdgeInsets.all(8.0),
-                              gridDelegate:
-                                  const SliverGridDelegateWithFixedCrossAxisCount(
-                                crossAxisCount: 3,
-                                crossAxisSpacing: 8.0,
-                                mainAxisSpacing: 8.0,
-                              ),
-                              itemCount: _images.length,
-                              itemBuilder: (context, index) {
-                                return GestureDetector(
-                                  onTap: () {
-                                    showDialog(
-                                      context: context,
-                                      builder: (BuildContext context) {
-                                        return Dialog(
-                                          backgroundColor: Colors.transparent,
-                                          insetPadding: const EdgeInsets.all(0),
-                                          child: GestureDetector(
-                                            onTap: () {
-                                              Navigator.of(context).pop();
-                                            },
-                                            child: Container(
-                                              width: MediaQuery.of(context)
-                                                  .size
-                                                  .width,
-                                              height: MediaQuery.of(context)
-                                                  .size
-                                                  .height,
-                                              decoration: BoxDecoration(
-                                                image: DecorationImage(
-                                                  image:
-                                                      FileImage(_images[index]),
-                                                  fit: BoxFit.cover,
-                                                ),
-                                              ),
-                                            ),
-                                          ),
-                                        );
-                                      },
-                                    );
-                                  },
-                                  child: Image.file(
-                                    _images[index],
-                                    fit: BoxFit.cover,
+                    : GridView.builder(
+                        padding: const EdgeInsets.all(8.0),
+                        gridDelegate:
+                            const SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: 3,
+                          crossAxisSpacing: 8.0,
+                          mainAxisSpacing: 8.0,
+                        ),
+                        itemCount: _images.length,
+                        itemBuilder: (context, index) {
+                          final filePath = _images[index].path;
+                          final fileName =
+                              filePath.split('/').last.split('.').first;
+
+                          return GestureDetector(
+                            onTap: () {
+                              showDialog(
+                                context: context,
+                                builder: (BuildContext context) {
+                                  return Dialog(
+                                    backgroundColor: Colors.transparent,
+                                    insetPadding: const EdgeInsets.all(0),
+                                    child: Image.file(_images[index],
+                                        fit: BoxFit.cover),
+                                  );
+                                },
+                              );
+                            },
+                            child: Stack(
+                              children: [
+                                Image.file(
+                                  _images[index],
+                                  fit: BoxFit.cover,
+                                ),
+                                // Apply blur if the image is not completed
+                                if (!completedImages.contains(fileName))
+                                  Positioned.fill(
+                                    child: BackdropFilter(
+                                      filter: ImageFilter.blur(
+                                          sigmaX: 1, sigmaY: 1),
+                                      child: Container(
+                                        color: Colors.transparent,
+                                      ),
+                                    ),
                                   ),
-                                );
-                              },
+                              ],
                             ),
-                          ),
-                          Expanded(
-                            child: ListView.builder(
-                              itemCount: _images.length,
-                              itemBuilder: (context, index) {
-                                return ListTile(
-                                  title: Text(
-                                    _images[index].path,
-                                    style: const TextStyle(color: Colors.white),
-                                  ),
-                                );
-                              },
-                            ),
-                          ),
-                        ],
+                          );
+                        },
                       ),
           ),
         ],
